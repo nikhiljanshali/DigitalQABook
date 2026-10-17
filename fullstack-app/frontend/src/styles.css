@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-font-family: 'Merriweather', Georgia, serif;
+}
+
+@layer base {
+  html, body {
+    background-color: #1c1917;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(45, 36, 28, 0.45) 0%, rgba(20, 16, 13, 0.95) 100%),
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0, rgba(255, 255, 255, 0.015) 1px, transparent 0, transparent 50px);
+    font-family: var(--app-font-family) !important;
+  }
+
+  /* Inherit dynamic font across UI elements unless explicitly monospaced */
+  h1, h2, h3, h4, h5, h6, p, label, select, input:not([type="password"]), textarea, button {
+    font-family: var(--app-font-family);
+  }
+}
+
+/* Custom scrollbar for sidebar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 160, 140, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 140, 120, 0.7);
+}
+
+/* Page corner flip aesthetic */
+.page-curl {
+  position: relative;
+}
+.page-curl::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 20px 20px;
+  border-color: transparent transparent #d6ccbf transparent;
+  box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+.page-curl:hover::after {
+  border-width: 0 0 28px 28px;
+}

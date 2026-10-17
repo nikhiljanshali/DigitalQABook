@@ -1,0 +1,176 @@
+<!-- Full App Container -->
+<div 
+  class="h-screen flex flex-col overflow-hidden select-none transition-colors duration-500"
+  [style.backgroundColor]="theme.getThemeConfig().deskBg"
+>
+  
+  <!-- ================= SCENARIO 1: LOGIN FIRST (When Unauthenticated) ================= -->
+  <ng-container *ngIf="!auth.isAuthenticated()">
+    <app-login-view></app-login-view>
+  </ng-container>
+
+  <!-- ================= SCENARIO 2: AUTHENTICATED DIGITAL BOOK INTERFACE ================= -->
+  <ng-container *ngIf="auth.isAuthenticated()">
+    
+    <!-- Global Header -->
+    <header class="h-14 bg-stone-950/90 border-b border-stone-800/80 px-4 flex items-center justify-between shrink-0 z-30 shadow-md">
+      <!-- Brand / Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-amber-600/20 border border-amber-600/40 flex items-center justify-center text-lg shadow-inner">
+          📖
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-amber-100 text-sm sm:text-base tracking-wide flex items-center gap-2">
+            Digital Q&A Book
+            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.2 rounded-full font-mono uppercase">
+              v1.0
+            </span>
+          </h1>
+          <p class="text-[10px] text-stone-400 hidden sm:block">Full-Stack Knowledge Repository & Study Companion</p>
+        </div>
+      </div>
+
+      <!-- Center / Right Actions & Theme Switcher -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Theme Dropdown Selector -->
+        <div class="flex items-center gap-1.5 bg-stone-900 border border-stone-700/80 px-2 py-1 rounded-xl shadow-inner">
+          <span class="text-xs">🎨</span>
+          <label for="theme-select" class="text-[11px] text-stone-400 font-semibold hidden md:inline">Theme:</label>
+          <select
+            id="theme-select"
+            [ngModel]="theme.currentTheme()"
+            (ngModelChange)="changeTheme($event)"
+            class="bg-stone-800 text-stone-100 text-xs rounded-lg px-2 py-1 border border-stone-700 focus:outline-none focus:border-amber-500 font-medium cursor-pointer"
+          >
+            <option *ngFor="let t of theme.themes" [value]="t.id">
+              {{ t.icon }} {{ t.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Font Dropdown Selector -->
+        <div class="flex items-center gap-1.5 bg-stone-900 border border-stone-700/80 px-2 py-1 rounded-xl shadow-inner">
+          <span class="text-xs">🔤</span>
+          <label for="font-select" class="text-[11px] text-stone-400 font-semibold hidden md:inline">Font:</label>
+          <select
+            id="font-select"
+            [ngModel]="fontService.currentFont()"
+            (ngModelChange)="changeFont($event)"
+            class="bg-stone-800 text-stone-100 text-xs rounded-lg px-2 py-1 border border-stone-700 focus:outline-none focus:border-amber-500 font-medium cursor-pointer"
+          >
+            <option *ngFor="let f of fontService.fonts" [value]="f.id">
+              {{ f.icon }} {{ f.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Chapters count badge -->
+        <div class="hidden lg:flex items-center gap-1.5 text-xs text-stone-400 bg-stone-900 px-2.5 py-1 rounded-md border border-stone-800">
+          <span>Chapters:</span>
+          <span class="font-mono text-amber-400 font-bold">{{ state.chapters().length }}</span>
+        </div>
+
+        <!-- QA count badge -->
+        <div class="hidden lg:flex items-center gap-1.5 text-xs text-stone-400 bg-stone-900 px-2.5 py-1 rounded-md border border-stone-800">
+          <span>Total Q&As:</span>
+          <span class="font-mono text-amber-400 font-bold">{{ state.totalItems() }}</span>
+        </div>
+
+        <!-- Refresh button -->
+        <button 
+          (click)="state.refreshAll()"
+          class="p-1.5 text-stone-400 hover:text-stone-100 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-800 transition-colors"
+          title="Refresh Data"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+
+        <!-- New Entry Button -->
+        <button 
+          (click)="state.openCreateModal()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-600 hover:bg-amber-500 text-stone-950 transition-all shadow-md active:scale-95"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span class="hidden sm:inline">New Q&A</span>
+        </button>
+
+        <!-- User Profile & Logout -->
+        <div *ngIf="auth.currentUser() as user" class="flex items-center gap-2 pl-2 border-l border-stone-800">
+          <div class="flex items-center gap-2 bg-stone-900 border border-stone-700/80 px-2.5 py-1 rounded-lg">
+            <div class="w-6 h-6 rounded-full bg-amber-600 text-stone-950 flex items-center justify-center text-xs font-bold font-mono">
+              {{ user.username.substring(0, 1).toUpperCase() }}
+            </div>
+            <div class="flex flex-col text-left">
+              <span class="text-xs font-semibold text-stone-200 leading-tight">{{ user.username }}</span>
+              <span 
+                class="text-[9px] font-mono leading-none font-semibold"
+                [ngClass]="user.role === 'admin' ? 'text-amber-400' : 'text-emerald-400'"
+              >
+                {{ user.role | uppercase }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Sign Out Button -->
+          <button 
+            (click)="auth.logout()"
+            class="p-1.5 text-stone-400 hover:text-red-400 hover:bg-stone-800 rounded-lg transition-colors border border-stone-800"
+            title="Sign Out"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Error Banner if Backend is down -->
+    <div *ngIf="state.error()" class="bg-red-950/90 border-b border-red-800/80 px-4 py-2 text-xs text-red-200 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span>⚠️</span>
+        <span>{{ state.error() }}</span>
+      </div>
+      <button (click)="state.refreshAll()" class="underline hover:text-white font-medium">Retry</button>
+    </div>
+
+    <!-- Reading Desk (Sidebar + Enormous Book View) -->
+    <div class="flex-1 flex overflow-hidden relative">
+      <!-- Table of Contents Sidebar -->
+      <app-table-of-contents></app-table-of-contents>
+
+      <!-- Main Book Reading Spread -->
+      <main class="flex-1 overflow-hidden flex flex-col relative">
+        <app-book-view></app-book-view>
+      </main>
+    </div>
+
+    <!-- Interactive Modals -->
+    <app-qa-modal></app-qa-modal>
+    <app-delete-confirm-dialog></app-delete-confirm-dialog>
+    <app-chapter-modal></app-chapter-modal>
+    <app-delete-chapter-dialog></app-delete-chapter-dialog>
+
+  </ng-container>
+
+  <!-- Global Toast Notification Floating Pill -->
+  <div 
+    *ngIf="state.toast() as t"
+    class="fixed top-16 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-2xl text-xs font-medium border animate-bounce"
+    [ngClass]="{
+      'bg-emerald-900/90 text-emerald-100 border-emerald-600': t.type === 'success',
+      'bg-red-900/90 text-red-100 border-red-600': t.type === 'error',
+      'bg-amber-900/90 text-amber-100 border-amber-600': t.type === 'info'
+    }"
+  >
+    <span>{{ t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : 'ℹ️' }}</span>
+    <span>{{ t.text }}</span>
+  </div>
+
+</div>
